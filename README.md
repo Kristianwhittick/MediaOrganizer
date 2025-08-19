@@ -38,7 +38,7 @@ cd MediaOrganizer
 go mod tidy
 
 # Build for current platform
-go build -o mediaorganizer main.go
+go build -o mediaorganizer ./cmd
 
 # Or build for all platforms
 make
@@ -54,13 +54,19 @@ make
 
 # Windows
 mediaorganizer.exe C:\Photos C:\Organized
+
+# Show help
+./mediaorganizer --help
+
+# Show version
+./mediaorganizer --version
 ```
 
 ### Metadata-Only Mode
 
 ```bash
 # Only process files with extractable metadata dates
-./mediaorganizer /path/to/source /path/to/destination -m
+./mediaorganizer -m /path/to/source /path/to/destination
 ```
 
 ### Command Line Options
@@ -68,6 +74,8 @@ mediaorganizer.exe C:\Photos C:\Organized
 - `<source>` - Source directory containing media files
 - `<destination>` - Output directory for organized files
 - `-m` - Metadata-only mode (skip files without metadata dates)
+- `--help` - Show help information
+- `--version` - Show version information
 
 ## Output Structure
 
@@ -103,7 +111,7 @@ destination/
 ### Process Only Files with Metadata
 
 ```bash
-./mediaorganizer ./photos ./sorted -m
+./mediaorganizer -m ./photos ./sorted
 ```
 
 ### Cross-Platform Paths
@@ -142,19 +150,22 @@ make clean
 
 # Install dependencies
 make deps
+
+# Run tests
+go test ./organizer
 ```
 
 ### Manual Cross-Compilation
 
 ```bash
 # Windows x64
-GOOS=windows GOARCH=amd64 go build -o mediaorganizer-windows.exe main.go
+GOOS=windows GOARCH=amd64 go build -o mediaorganizer-windows.exe ./cmd
 
 # Linux x64
-GOOS=linux GOARCH=amd64 go build -o mediaorganizer-linux main.go
+GOOS=linux GOARCH=amd64 go build -o mediaorganizer-linux ./cmd
 
 # Linux ARM
-GOOS=linux GOARCH=arm GOARM=5 go build -o mediaorganizer-arm main.go
+GOOS=linux GOARCH=arm GOARM=5 go build -o mediaorganizer-arm ./cmd
 ```
 
 ## Dependencies
@@ -164,8 +175,9 @@ GOOS=linux GOARCH=arm GOARM=5 go build -o mediaorganizer-arm main.go
 ## Performance
 
 - **Fast**: Uses `os.Rename()` for same-filesystem moves (no data copying)
-- **Memory Efficient**: Processes files one at a time
+- **Memory Efficient**: Processes files one at a time with optimized MP4 parsing
 - **Scalable**: Handles thousands of files efficiently
+- **Secure**: Path validation prevents directory traversal attacks
 
 ## Limitations
 
