@@ -30,9 +30,22 @@ func main() {
 	os.MkdirAll(outputDir, 0755)
 
 	err := filepath.Walk(workingDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() {
+		if err != nil {
 			return err
 		}
+		
+		// Skip hidden directories and files
+		if strings.HasPrefix(info.Name(), ".") {
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		
+		if info.IsDir() {
+			return nil
+		}
+		
 		if isMediaFile(path) {
 			return moveFile(path, outputDir)
 		}
