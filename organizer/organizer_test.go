@@ -8,7 +8,7 @@ import (
 
 func TestValidatePaths(t *testing.T) {
 	org := New(false)
-	
+
 	tests := []struct {
 		name        string
 		source      string
@@ -20,7 +20,7 @@ func TestValidatePaths(t *testing.T) {
 		{"path traversal in output", "/tmp", "/tmp/../etc", true},
 		{"non-existent source", "/nonexistent", "/tmp/output", true},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := org.validatePaths(tt.source, tt.output)
@@ -45,7 +45,7 @@ func TestIsMediaFile(t *testing.T) {
 		{"document.pdf", false},
 		{"image.png", false},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.filename, func(t *testing.T) {
 			result := IsMediaFile(tt.filename)
@@ -58,16 +58,16 @@ func TestIsMediaFile(t *testing.T) {
 
 func TestGetUniqueFilename(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create a test file
 	testFile := filepath.Join(tmpDir, "test.jpg")
 	if err := os.WriteFile(testFile, []byte("test"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	
+
 	unique := GetUniqueFilename(tmpDir, "test.jpg")
 	expected := filepath.Join(tmpDir, "test1.jpg")
-	
+
 	if unique != expected {
 		t.Errorf("GetUniqueFilename() = %s, want %s", unique, expected)
 	}

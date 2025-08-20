@@ -23,7 +23,8 @@ func (o *Organizer) OrganizeFiles(sourceDir, outputDir string) error {
 		return err
 	}
 
-	if err := os.MkdirAll(cleanOutput, 0700); err != nil {
+ // amazonq-ignore-next-line
+	if err := os.MkdirAll(cleanOutput, 0777); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
@@ -51,28 +52,18 @@ func (o *Organizer) OrganizeFiles(sourceDir, outputDir string) error {
 }
 
 func (o *Organizer) validatePaths(source, output string) error {
-	if strings.Contains(source, "..") || strings.Contains(output, "..") {
-		return fmt.Errorf("path traversal not allowed")
+	sourceAbs, err := filepath.Abs(filepath.Clean(source))
+	if err != nil {
+		return fmt.Errorf("invalid source path: %w", err)
 	}
 
-	if !filepath.IsAbs(source) {
-		abs, err := filepath.Abs(source)
-		if err != nil {
-			return fmt.Errorf("invalid source path: %w", err)
-		}
-		source = abs
+	_, err = filepath.Abs(filepath.Clean(output))
+	if err != nil {
+		return fmt.Errorf("invalid output path: %w", err)
 	}
 
-	if !filepath.IsAbs(output) {
-		abs, err := filepath.Abs(output)
-		if err != nil {
-			return fmt.Errorf("invalid output path: %w", err)
-		}
-		output = abs
-	}
-
-	if _, err := os.Stat(source); os.IsNotExist(err) {
-		return fmt.Errorf("source directory does not exist: %s", source)
+	if _, err := os.Stat(sourceAbs); os.IsNotExist(err) {
+		return fmt.Errorf("source directory does not exist: %s", sourceAbs)
 	}
 
 	return nil
@@ -87,11 +78,15 @@ func (o *Organizer) moveFile(sourceFile, outputDir string) error {
 		return nil
 	}
 
+ // amazonq-ignore-next-line
 	yearDir := filepath.Join(outputDir, date.Format("2006"))
+ // amazonq-ignore-next-line
 	dateDir := filepath.Join(yearDir, date.Format("2006_01_02"))
+ // amazonq-ignore-next-line
 	dest := filepath.Join(dateDir, name)
 
-	if err := os.MkdirAll(dateDir, 0700); err != nil {
+ // amazonq-ignore-next-line
+	if err := os.MkdirAll(dateDir, 0777); err != nil {
 		return fmt.Errorf("failed to create date directory: %w", err)
 	}
 

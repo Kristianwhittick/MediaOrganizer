@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"mediaorganizer/organizer"
 )
@@ -40,6 +42,34 @@ func main() {
 
 	sourceDir := args[0]
 	outputDir := args[1]
+
+	if strings.TrimSpace(sourceDir) == "" {
+		fmt.Fprintf(os.Stderr, "Error: source directory cannot be empty\n")
+		os.Exit(1)
+	}
+	if strings.TrimSpace(outputDir) == "" {
+		fmt.Fprintf(os.Stderr, "Error: destination directory cannot be empty\n")
+		os.Exit(1)
+	}
+
+	if info, err := os.Stat(sourceDir); err != nil {
+		if os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "Error: source directory does not exist: %s\n", sourceDir)
+		} else {
+			fmt.Fprintf(os.Stderr, "Error: cannot access source directory: %v\n", err)
+		}
+		os.Exit(1)
+	} else if !info.IsDir() {
+		fmt.Fprintf(os.Stderr, "Error: source path is not a directory: %s\n", sourceDir)
+		os.Exit(1)
+	}
+
+	if parentDir := filepath.Dir(outputDir); parentDir != "." {
+		if _, err := os.Stat(parentDir); err != nil && os.IsNotExist(err) {
+			fmt.Fprintf(os.Stderr, "Error: destination parent directory does not exist: %s\n", parentDir)
+			os.Exit(1)
+		}
+	}
 
 	// amazonq-ignore-next-line
 	org := organizer.New(*metadataOnly)

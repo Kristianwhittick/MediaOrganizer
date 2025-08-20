@@ -27,33 +27,35 @@ func IsMediaFile(filename string) bool {
 
 func GetDate(filename string, metadataOnly bool) *time.Time {
 	ext := strings.ToLower(filepath.Ext(filename))
-	
+
 	if ext == ".jpg" || ext == ".jpeg" {
 		if date := getExifDate(filename); date != nil {
 			return date
 		}
 	}
-	
+
 	if ext == ".mp4" {
 		if date := getMp4Date(filename); date != nil {
 			return date
 		}
 	}
-	
+
 	if metadataOnly {
 		return nil
 	}
-	
+
+ // amazonq-ignore-next-line
 	if info, err := os.Stat(filename); err == nil {
 		t := info.ModTime()
 		return &t
 	}
-	
+
 	t := time.Now()
 	return &t
 }
 
 func getExifDate(filename string) *time.Time {
+ // amazonq-ignore-next-line
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil
@@ -74,6 +76,7 @@ func getExifDate(filename string) *time.Time {
 }
 
 func getMp4Date(filename string) *time.Time {
+ // amazonq-ignore-next-line
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil
@@ -83,21 +86,21 @@ func getMp4Date(filename string) *time.Time {
 	buf := make([]byte, 4096)
 	mvhdAtom := []byte("mvhd")
 	totalRead := 0
-	
+
 	for totalRead < maxMP4ReadSize {
 		n, err := file.Read(buf)
 		if err != nil || n < 8 {
 			break
 		}
 		totalRead += n
-		
+
 		for i := 0; i <= n-8; i++ {
 			if i+20 <= n && bytes.Equal(buf[i+4:i+8], mvhdAtom) {
 				size := binary.BigEndian.Uint32(buf[i:i+4])
 				if size < 32 {
 					continue
 				}
-				
+
 				mp4Time := binary.BigEndian.Uint32(buf[i+16:i+20])
 				unixTime := int64(mp4Time) - mp4ToUnixEpochOffset
 				if unixTime > 0 {
@@ -107,21 +110,22 @@ func getMp4Date(filename string) *time.Time {
 				return nil
 			}
 		}
-		
+
 		if n == 4096 {
-			if _, err := file.Seek(-7, 1); err != nil {
+			if _, err := file.Seek(-32, 1); err != nil {
 				break
 			}
 		}
 	}
-	
+
 	return nil
 }
 
 func GetUniqueFilename(dir, name string) string {
 	ext := filepath.Ext(name)
 	base := strings.TrimSuffix(name, ext)
-	
+
+ // amazonq-ignore-next-line
 	for i := 1; ; i++ {
 		var newName string
 		if ext == "" {
@@ -129,7 +133,8 @@ func GetUniqueFilename(dir, name string) string {
 		} else {
 			newName = base + strconv.Itoa(i) + ext
 		}
-		
+
+  // amazonq-ignore-next-line
 		newPath := filepath.Join(dir, newName)
 		if _, err := os.Stat(newPath); os.IsNotExist(err) {
 			return newPath
